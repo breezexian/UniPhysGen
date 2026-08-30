@@ -1,7 +1,5 @@
 # <a id="top"></a>UniPhys Pipeline
 
----
-
 <p align="left">
   <a href="#overview"><b>Overview</b></a> |
   <a href="#features"><b>Features</b></a> |
@@ -29,9 +27,9 @@ consistency reports.
 *UniPhys Pipeline. From a heterogeneous raw 3D mesh to a simulation-ready asset
 with unified articulation semantics and intrinsic physical properties.*
 
-## <a id="overview"></a>What the pipeline does
-
 ---
+
+## <a id="overview"></a>What the pipeline does
 
 The implementation follows the four modules described in the paper:
 
@@ -79,9 +77,9 @@ The paper modules map to the executable stages as follows:
 
 The command-line entry point is [`pipeline.py`](pipeline.py).
 
-## <a id="features"></a>Key engineering features
-
 ---
+
+## <a id="features"></a>Key engineering features
 
 - Typed YAML/JSON configuration with repository-relative path resolution.
 - Explicit stage registry and dependency graph.
@@ -92,9 +90,9 @@ The command-line entry point is [`pipeline.py`](pipeline.py).
 - Lazy imports, so help, stage listing, and status inspection avoid loading GPU
   dependencies.
 
-## <a id="requirements"></a>System requirements
-
 ---
+
+## <a id="requirements"></a>System requirements
 
 The complete pipeline targets Linux with:
 
@@ -111,9 +109,9 @@ PyTorch 2.4/CUDA 12.4, while current SAM2 installation guidance recommends a
 newer PyTorch stack. The orchestrator invokes their configured Python
 interpreters as subprocesses.
 
-## <a id="installation"></a>Installation
-
 ---
+
+## <a id="installation"></a>Installation
 
 ### 1. UniPhys Pipeline environment
 
@@ -235,9 +233,9 @@ export OPENAI_API_KEY='...'
 
 `OPENAI_BASE_URL` may be used when `gpt.base_url` is `null`.
 
-## <a id="configuration"></a>Data layout and configuration
-
 ---
+
+## <a id="configuration"></a>Data layout and configuration
 
 Relative paths in configuration files are resolved from the repository root.
 The standard layout is derived from:
@@ -262,9 +260,9 @@ outputs/ABO/gpt_output/4/              # properties, joints, XML, validation
 Every path can be overridden independently. See
 [`configs/example.yaml`](configs/example.yaml) for the complete schema.
 
-## <a id="quick-start"></a>Quick start
-
 ---
+
+## <a id="quick-start"></a>Quick start
 
 The repository includes a pipeline-ready example asset at
 `samples/ABO/4/B00IIFW2L4.glb`, and the example configuration already selects
@@ -313,9 +311,9 @@ creating state or output files with:
 python pipeline.py run --config configs/local.yaml --dry-run
 ```
 
-## <a id="custom-meshes"></a>Running on your own meshes
-
 ---
+
+## <a id="custom-meshes"></a>Running on your own meshes
 
 The decomposition stages rely on the same stable face ordering in Blender,
 Trimesh, and PartField. A custom input must therefore resolve to exactly one
@@ -403,9 +401,9 @@ python pipeline.py doctor --config configs/my_dataset.yaml
 python pipeline.py run --config configs/my_dataset.yaml
 ```
 
-## <a id="resume"></a>Resume and state
-
 ---
+
+## <a id="resume"></a>Resume and state
 
 Resume is enabled by default. A stage is skipped only when its saved execution
 fingerprint matches and its declared outputs still validate. Existing legacy
@@ -429,9 +427,9 @@ Per-entity metadata is stored under:
 └── errors/<stage>.log
 ```
 
-## <a id="repository-layout"></a>Repository layout
-
 ---
+
+## <a id="repository-layout"></a>Repository layout
 
 ```text
 pipeline.py                 Stable CLI entry point
@@ -444,9 +442,9 @@ tests/                      CPU-only orchestration tests
 utils/                      Geometry, rendering, annotation, and validation code
 ```
 
-## <a id="development"></a>Development
-
 ---
+
+## <a id="development"></a>Development
 
 ```bash
 python -m pytest
@@ -454,9 +452,9 @@ python -m ruff check pipeline.py uniphys pre_process tests
 python -m mypy pipeline.py uniphys
 ```
 
-## <a id="citation"></a>Citation
-
 ---
+
+## <a id="citation"></a>Citation
 
 If you use UniPhys Pipeline in your research, please cite:
 
@@ -469,9 +467,9 @@ If you use UniPhys Pipeline in your research, please cite:
 }
 ```
 
-## <a id="license"></a>License
-
 ---
+
+## <a id="license"></a>License
 
 The UniPhys orchestration code is provided under the Apache License 2.0.
 Third-party code, checkpoints, and datasets remain governed by their own

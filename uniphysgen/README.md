@@ -51,9 +51,9 @@ documentation for UniPhys-40K and UniPhys-Bench.
 
 <p align="center"><em>UniPhysGen encodes object- and part-level 3D geometry and produces unified object, structure, kinematics, and physics annotations.</em></p>
 
-## <a id="model"></a>Model
-
 ---
+
+## <a id="model"></a>Model
 
 Given an object point cloud <i>X</i><sub>o</sub> and, when required, a target-part
 point cloud <i>X</i><sub>p</sub>, UniPhysGen predicts four complementary categories
@@ -89,18 +89,18 @@ Face. The training-only initialization checkpoint is documented separately in
 | UniPhysGen-1.7B-Structure | Articulation structure grounding | 🤗 [Hugging Face](https://huggingface.co/breezexian/UniPhysGen-1.7B-Structure) |
 | UniPhysGen-1.7B-Object | Object-level physical grounding | 🤗 [Hugging Face](https://huggingface.co/breezexian/UniPhysGen-1.7B-Object) |
 
-## <a id="datasets"></a>Datasets
-
 ---
+
+## <a id="datasets"></a>Datasets
 
 | Dataset | Purpose | Scale | Download |
 | --- | --- | --- | --- |
 | UniPhys-40K | Training unified physical grounding models | 40K (40014) objects, 400K total parts, 370K filtered training parts | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) |
 | UniPhys-Bench | Human-verified unified physical grounding evaluation | 1.9K (1927) articulated objects, 16K parts, 5.5K motion-relevant components | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
 
-## <a id="installation"></a>Installation
-
 ---
+
+## <a id="installation"></a>Installation
 
 All regular Python dependencies are declared in `pyproject.toml`, including
 the recommended `transformers==4.51.0` version.
@@ -156,9 +156,9 @@ Verify the environment:
 python -c "import torch, transformers, torch_scatter, spconv.pytorch; print('torch:', torch.__version__, 'cuda:', torch.version.cuda, 'transformers:', transformers.__version__)"
 ```
 
-## <a id="inference"></a>Inference
-
 ---
+
+## <a id="inference"></a>Inference
 
 UniPhysGen provides one fixed entry point for each grounding task. Every entry
 point supports both single-sample and JSON-batch inference. This section is
@@ -343,9 +343,9 @@ Every saved prediction follows the versioned
   normalized point-cloud frames.
 - `source_sample` preserves the original batch item for downstream evaluation.
 
-## <a id="reproducing-uniphys-bench-results"></a>Reproducing UniPhys-Bench Results
-
 ---
+
+## <a id="reproducing-uniphys-bench-results"></a>Reproducing UniPhys-Bench Results
 
 Use this workflow to reproduce the four groups of UniPhysGen results reported
 on UniPhys-Bench. Starting from the released benchmark, the full path from raw
@@ -525,9 +525,9 @@ The evaluators read ground truth exclusively from each prediction's embedded
 not reopen point-cloud files during metric computation. See
 [`eval/README.md`](eval/README.md) for the prediction schema and metric details.
 
-## <a id="training"></a>Training
-
 ---
+
+## <a id="training"></a>Training
 
 UniPhysGen is trained in two phases: physical semantic alignment pretraining,
 followed by task-specific full-parameter fine-tuning.
@@ -795,9 +795,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python train.py <PATH_TO_CONFIG.yaml>
 The release configs remain the source of truth for task-specific
 hyperparameters and augmentation settings.
 
-## <a id="license"></a>License
-
 ---
+
+## <a id="license"></a>License
 
 The UniPhysGen source code is released under the
 [Apache License 2.0](LICENSE.txt). Released UniPhysGen model weights are
@@ -806,9 +806,9 @@ checkpoint. UniPhys-40K and UniPhys-Bench contain assets from multiple upstream
 sources, so consult the dataset repositories and retained per-asset provenance
 for the applicable terms.
 
-## <a id="citation"></a>Citation
-
 ---
+
+## <a id="citation"></a>Citation
 
 ```bibtex
 @article{li2026uniphysgen,
