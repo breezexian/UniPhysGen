@@ -1,0 +1,81 @@
+# Paths are resolved relative to the repository root, not the current shell.
+dataset:
+  name: ABO
+  type_name: "4"
+  input_root: samples
+  output_root: outputs
+
+  # Optional absolute or repository-relative overrides:
+  # mesh_root: /data/ABO/4
+  # render_root: /data/uniphys/render_res
+  # decomposition_root: /data/uniphys/decomposition_res/4
+  # gpt_output_root: /data/uniphys/gpt_output/4
+  extensions: [".glb"]
+
+pipeline:
+  stages:
+    - render
+    - decompose
+    - export_parts
+    - annotate_basic
+    - build_kinematic_graph
+    - propose_kinematics
+    - render_axes
+    - annotate_revolute
+    - annotate_prismatic
+    - generate_mujoco
+    - validate_basic
+    - validate_simulation
+
+  render_num: 8
+  show_part: false
+  max_merge_num: 10
+  cmp_iou_type: area_type
+  refine_sam_masks: true
+  run_sam2_if_missing: true
+
+  max_faces: 500000
+  faces_per_batch: 30000
+  max_parts: 50
+  cluster_search_min: 3
+  cluster_search_max: 15
+  part_refine_timeout_seconds: 60
+  merge_timeout_seconds: 30
+  # false: fixed thresholds (0.01 / 0.001); true: scale by the mesh's longest side.
+  part_refine_after_merge_use_relative_threshold: false  # 1% of longest side
+  post_process_use_relative_threshold: false             # 0.1% of longest side
+
+  cleanup_intermediates: true
+  remove_part_glbs_after_render: true
+  resume: true
+  adopt_existing_outputs: true
+  fail_fast: false
+  workers: 1
+  start: 0
+  end: null
+
+runtime:
+  blender: blender
+
+  # Set env_dir to a Conda environments directory to derive
+  # <env_dir>/sam/bin/python and <env_dir>/partfield/bin/python, or set the
+  # interpreters independently. null means the current Python interpreter.
+  env_dir: null
+  sam_python: null
+  partfield_python: null
+
+  # Download both checkpoints yourself from the official upstream repositories.
+  # Absolute paths outside this repository are recommended.
+  sam_checkpoint: /path/to/sam2/checkpoints/sam2_hiera_large.pt
+  partfield_checkpoint: /path/to/PartField/model/model_objaverse.ckpt
+  partfield_config: utils/partfield/configs/final/demo.yaml
+  command_timeout_seconds: null
+  gpu: "0"
+  lock_stale_seconds: 86400
+
+gpt:
+  model: gpt-5
+  base_url: null
+  api_key_env: OPENAI_API_KEY
+  basic_prompt: utils/gpt/sys_basic_prompt.txt
+  axis_prompt: utils/gpt/sys_axis_prompt.txt

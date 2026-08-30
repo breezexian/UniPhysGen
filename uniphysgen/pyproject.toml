@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uniphysgen"
+version = "0.1.0"
+description = "UniPhysGen: unified physical grounding for simulation-ready 3D assets"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+authors = [{name = "UniPhysGen authors"}]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "addict>=2.4,<3",
+  "huggingface-hub>=0.25,<1",
+  "numpy>=1.26,<2",
+  "open3d>=0.18,<0.19",
+  "packaging>=24,<26",
+  "pillow>=10,<12",
+  "safetensors>=0.4.5,<1",
+  "scipy>=1.12,<2",
+  "timm>=1.0,<2",
+  "torch==2.4.1",
+  "tqdm>=4.66,<5",
+  "transformers==4.51.0",
+  "trimesh>=4,<5",
+  "typing-extensions>=4.10,<5",
+]
+
+[project.optional-dependencies]
+train = [
+  "accelerate>=0.34,<=1.7.0",
+  "datasets>=2.16,<=3.6.0",
+  "omegaconf>=2.3,<3",
+  "PyYAML>=6,<7",
+  "wandb>=0.18,<1",
+]
+dev = [
+  "mypy>=1.10,<2",
+  "pytest>=8,<9",
+  "ruff>=0.6,<1",
+  "types-PyYAML>=6,<7",
+]
+
+[project.urls]
+Paper = "https://arxiv.org/abs/2607.13586"
+Repository = "https://github.com/breezexian/UniPhysGen"
+
+[tool.setuptools]
+py-modules = [
+  "inference_batch_articulation_structure",
+  "inference_batch_common",
+  "inference_batch_intrinsic_physics_object",
+  "inference_batch_intrinsic_physics_part",
+  "inference_batch_kinematic_parameters",
+  "train",
+]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["uniphysgen*", "eval*"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+explicit_package_bases = true
+follow_imports = "skip"
+ignore_missing_imports = true

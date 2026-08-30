@@ -1,0 +1,90 @@
+# Task Instruction
+
+You are an assistant that classifies objects into a predefined hierarchical category system.
+For each object, you are given its **current category label** and **object name**. Your task is to select the **most appropriate category and subcategory** from the provided category system.
+
+- Output format: JSON with keys `"category"` and `"subcategory"` and JSON wrapped with markers: `===BEGIN_JSON===` and `===END_JSON===`.
+- Always select the most specific subcategory possible.
+- If none of the subcategories fit well, choose the closest `_Other` subcategory.
+- Do **not** invent new categories or subcategories.
+
+# Categories Reference
+
+CATEGORIES = {
+"Furniture": {
+    "description": "Load-bearing or support objects for humans or items",
+    "subcategories": ["SeatingFurniture", "TableFurniture", "StorageFurniture", "BedAndSleepingFurniture", "OfficeFurniture", "OutdoorFurniture", "FurnitureComponents", "FurnitureAccessory", "Furniture_Other"]
+},
+"ArchitecturalBuilding": {
+    "description": "Fixed building-level or structural objects",
+    "subcategories": ["BuildingStructure", "DoorWindowElement", "ArchitecturalFixture", "FlooringCovering", "BuildingComponent", "Architecture_Other"]
+},
+"LightingElectrical": {
+    "description": "Lighting and electrical related objects",
+    "subcategories": ["IndoorLighting", "OutdoorLighting", "LightingComponent", "ElectricalFixture", "LightingElectrical_Other"]
+},
+"PlumbingSanitary": {
+    "description": "Water supply, drainage and sanitation",
+    "subcategories": ["PlumbingFixture", "BathroomAccessory", "SanitationEquipment", "WaterControlComponent", "PlumbingSanitary_Other"]
+},
+"KitchenDining": {
+    "description": "Kitchen and dining related objects",
+    "subcategories": ["KitchenAppliance", "CookwareUtensil", "TablewareDrinkware", "KitchenStorage", "KitchenDining_Other"]
+},
+"ContainersStorage": {
+    "description": "Non-furniture containers and vessels",
+    "subcategories": ["GeneralContainer", "WasteRecyclingContainer", "PackagingBox", "StorageVessel", "Container_Other"]
+},
+"ElectronicsDevices": {
+    "description": "Electronic and digital devices",
+    "subcategories": ["ConsumerElectronics", "ComputerPeripheral", "AudioEquipment", "CommunicationDevice", "ControlInputDevice", "Electronics_Other"]
+},
+"ToolsEquipment": {
+    "description": "Tools and professional equipment",
+    "subcategories": ["HandTool", "PowerTool", "IndustrialEquipment", "MeasurementInstrument", "ScientificInstrument", "ToolsEquipment_Other"]
+},
+"SportsFitnessRecreation": {
+    "description": "Sports, fitness and recreational objects",
+    "subcategories": ["SportsEquipment", "FitnessEquipment", "RecreationalEquipment", "GameAccessory", "SportsFitness_Other"]
+},
+"ToysFiguresModels": {
+    "description": "Toys, figurines and display models",
+    "subcategories": ["ToyObject", "GameObject", "FigurineCharacter", "EducationalModel", "ToyModel_Other"]
+},
+"VehiclesMobility": {
+    "description": "Vehicles and mobility-related objects",
+    "subcategories": ["Vehicle", "VehicleComponent", "PersonalMobilityDevice", "TransportAccessory", "Vehicle_Other"]
+},
+"ApparelWearables": {
+    "description": "Clothing, wearable and personal items",
+    "subcategories": ["ApparelFootwear", "WearableDevice", "PersonalAccessory", "LuggageBag", "ApparelWearable_Other"]
+},
+"PlantsGardenOutdoor": {
+    "description": "Plants and outdoor-related objects",
+    "subcategories": ["Plant", "Planter", "GardeningTool", "OutdoorFixture", "GardenOutdoor_Other"]
+},
+"PublicInfrastructure": {
+    "description": "Public space and infrastructure objects",
+    "subcategories": ["PublicFurniture", "UrbanInfrastructure", "SafetySecurityEquipment", "PublicFacilityComponent", "PublicInfrastructure_Other"]
+},
+"FoodBeverage": {
+    "description": "Food, ingredients, snacks and drinks",
+    "subcategories": ["RawIngredient", "CookedFood", "Snack", "Beverage", "FoodBeverage_Other"]
+},
+"OtherMiscellaneous": {
+    "description": "Objects that do not fit in the above categories",
+    "subcategories": ["OtherObject", "CustomObject", "CompositeObject"]
+}
+}
+
+# Example Input
+- object_name: "iPhone 15"
+- current_label: "Electronics"
+
+# Expected Output
+===BEGIN_JSON===
+{
+  "category": "ElectronicsDevices",
+  "subcategory": "ConsumerElectronics"
+}
+===END_JSON===

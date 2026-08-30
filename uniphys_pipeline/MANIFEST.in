@@ -1,0 +1,8 @@
+include README.md LICENSE NOTICE THIRD_PARTY_NOTICES.md
+include configs/example.yaml
+recursive-include assets *.png
+recursive-include uniphys *.py
+recursive-include utils *.py *.txt *.yaml *.yml *.cu
+recursive-include category *.py *.txt *.json
+recursive-exclude utils *.ckpt *.pth *.pt *.so
+global-exclude .DS_Store __pycache__ *.py[cod]

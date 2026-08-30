@@ -1,0 +1,49 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+configs/local*.yaml
+configs/local*.yml
+configs/local*.json
+
+# Pipeline outputs and intermediate state
+outputs/
+exp_results/
+tmp_partfield_*/
+*.log
+
+# Model checkpoints and generated binary artifacts
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.engine
+*.npy
+*.npz
+*.exr
+
+# Keep small, intentionally tracked fixtures by force-adding them explicitly.

@@ -1,0 +1,19 @@
+UniPhysGen
+Copyright 2026 UniPhysGen Authors
+
+This product includes software developed by the UniPhysGen authors.
+
+UniPhysGen uses Qwen3-1.7B as its language backbone. Qwen3 is Copyright
+Alibaba Cloud and is distributed under the Apache License 2.0. See:
+https://huggingface.co/Qwen/Qwen3-1.7B
+
+UniPhysGen includes and adapts software from Sonata, Copyright Meta Platforms,
+Inc. and affiliates, distributed under the Apache License 2.0. The official
+Sonata pretrained model weights are distributed separately under the Creative
+Commons Attribution-NonCommercial 4.0 International license. See:
+https://github.com/facebookresearch/sonata
+
+The Apache License 2.0 in LICENSE.txt applies to the UniPhysGen source code.
+Released UniPhysGen model weights that incorporate the official Sonata
+pretrained weights are distributed under CC BY-NC 4.0; see the LICENSE file
+included with each checkpoint.
