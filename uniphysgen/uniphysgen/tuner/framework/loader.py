@@ -124,8 +124,8 @@ def load_base_checkpoint_with_fresh_motion_head(
     Notes:
       - Since the base checkpoint does not contain `motion_head.*` keys, HuggingFace
         will not load them, so the head should already be randomly initialized.
-      - This function additionally re-initializes `motion_head` if it exposes
-        `_init_weights()` (as in this repo) or otherwise resets parameters.
+      - A fresh model is constructed from config, then only non-motion-head
+        weights are loaded. `MotionHead` keeps its constructor initialization.
 
         If `export_dir` is provided, this function will also export a full HF-style
         checkpoint at `export_dir` (including the freshly initialized motion head).
@@ -157,7 +157,7 @@ def load_base_checkpoint_with_fresh_motion_head(
     if torch_dtype is not None:
         model.to(dtype=torch_dtype)
     if device_map is not None:
-        # Best-effort: let HF dispatch if supported.
+        # Best-effort device placement through model.to().
         try:
             model = model.to(device_map)  # type: ignore[arg-type]
         except Exception:
@@ -230,17 +230,19 @@ def assemble_and_export_qwen_sonata_pretrained(
         strict_sonata: bool = True,
         dtype: Optional[torch.dtype] = None,
 ) -> str:
-    """Assemble a new multimodal checkpoint (Qwen2 + Sonata + projector) and export it.
+    """Assemble a UniPhysGen checkpoint (Qwen3 + Sonata + projector) and export it.
 
-    This implements "方案 A": do a one-time weight merge/export, then fine-tune via
+    Merge and export pretrained weights once, then fine-tune via
     `AutoModelForCausalLM.from_pretrained(export_dir, trust_remote_code=True)`.
 
     Inputs
-    - llm_name_or_path: a Qwen2 HF repo/path (language-only pretrained).
+    - llm_name_or_path: a Qwen3 HF repo/path (language-only pretrained).
     - sonata_state_dict_path: path to Sonata pretrained weights (.pt/.pth) containing a state_dict.
     - export_dir: output directory (will be created if missing).
 
     Notes
+    - Pass UniPhysGenQwen3ForCausalLM as `model_class` and
+      UniPhysGenQwen3Config as `config_class`.
     - `point_config` must match the Sonata variant you are loading (in_channels/order/...
       and embed dim for projector). If omitted, the caller must ensure the base config
       already includes `point_config`.
@@ -256,36 +258,16 @@ def assemble_and_export_qwen_sonata_pretrained(
         "token": token,
     }
 
-    # 1) Start from Qwen2 config and patch in multimodal fields.
-    # base_cfg = AutoConfig.from_pretrained(llm_name_or_path, **init_kwargs)
-
-    # from physllm.model.spatiallm_qwen import SpatialLMQwenConfig
-
+    # 1) Load Qwen3 settings through the supplied UniPhysGenQwen3Config class.
     base_cfg = config_class.from_pretrained(llm_name_or_path, **init_kwargs)
 
-    # IMPORTANT:
-    # Do not rely on `auto_map` here. Some transformers versions parse dynamic-module
-    # class references as "module_file.ClassName" (single dot). Passing a full import
-    # path (e.g. "physllm.model.spatiallm_qwen.SpatialLMQwenForCausalLM") can trigger:
-    #   ValueError: too many values to unpack (expected 2)
-    # Instead, force model_type and ensure our custom classes are registered.
-
-    # todo no need, overwrite the model_type and architectures when saving
-    # base_cfg.model_type = "spatiallm_qwen"
-    # base_cfg.architectures = ["SpatialLMQwenForCausalLM"]
-
-    # Trigger AutoModel registration side effects.
-    # import physllm.model.spatiallm_qwen  # noqa: F401
-
-    # Minimal multimodal config fields expected by SpatialLMQwenForCausalLM.
+    # Multimodal config fields consumed by UniPhysGenQwen3ForCausalLM.
     if not hasattr(base_cfg, "point_config"):
         base_cfg.point_config = {}
     if point_config is not None:
         base_cfg.point_config.update(point_config)
 
-    # Ensure required point backbone fields exist.
-    # `num_bins` controls voxel/coordinate normalization resolution and is required by
-    # both SceneScript and Sonata backbones in this repo.
+    # Coordinate resolution used by the Sonata backbone's positional encoding.
     base_cfg.point_config.setdefault("num_bins", 400)
 
     # Required: which point backbone to build.
@@ -293,11 +275,11 @@ def assemble_and_export_qwen_sonata_pretrained(
         base_cfg.point_backbone = "sonata"
 
     # Optional: image backbone (e.g. CLIP).
-    # NOTE: in PhysLLMQwenForCausalLM, image modality is enabled by `config.image_backbone`.
+    # UniPhysGenQwen3ForCausalLM enables images through `config.image_backbone`.
     if use_image_backbone:
         setattr(base_cfg, "image_backbone", image_backbone)
         # Persist the exact vision tower spec for model __init__.
-        # `PhysLLMQwenForCausalLM` will prefer this over a default CLIPVisionConfig().
+        # UniPhysGenQwen3ForCausalLM prefers this over a default CLIPVisionConfig().
         if image_backbone_name_or_path is not None:
             setattr(base_cfg, "image_backbone_name_or_path", image_backbone_name_or_path)
             try:
@@ -317,9 +299,6 @@ def assemble_and_export_qwen_sonata_pretrained(
     setattr(base_cfg, "projector", projector)
 
     # Do NOT force-enable image backbone here.
-
-    # Token ids for placeholder insertion.
-    # SpatialLMQwenForCausalLM reads: point_start_token_id/point_end_token_id/point_token_id.
 
     # 2) Ensure multimodal special tokens exist and ids are written into config
     # BEFORE building the model, because the model __init__ reads these fields.
@@ -355,7 +334,7 @@ def assemble_and_export_qwen_sonata_pretrained(
     if additional:
         tok.add_special_tokens({"additional_special_tokens": additional}, replace_additional_special_tokens=False)
 
-    # Record token ids into config (required by SpatialLMQwenForCausalLM).
+    # Record separate part/object boundaries and image ids for UniPhysGenQwen3ForCausalLM.
 
     base_cfg.part_point_start_token_id = tok.convert_tokens_to_ids(part_point_start_tok)
     base_cfg.part_point_end_token_id = tok.convert_tokens_to_ids(part_point_end_tok)
@@ -368,13 +347,10 @@ def assemble_and_export_qwen_sonata_pretrained(
     base_cfg.image_end_token_id = tok.convert_tokens_to_ids(img_end_tok)
     base_cfg.image_token_id = tok.convert_tokens_to_ids(img_pad_tok)
 
-    # 3) Build the multimodal model class from config.
-    # model = AutoModelForCausalLM.from_config(
-    #     base_cfg, trust_remote_code=trust_remote_code
-    # )
+    # 3) Construct the supplied UniPhysGenQwen3ForCausalLM class directly.
     model = model_class(base_cfg)
 
-    # 3) Load Qwen2 pretrained weights into the assembled model (language tower + lm_head).
+    # 4) Load Qwen3 pretrained weights into the language tower and lm_head.
     # We intentionally load by submodules to avoid accidental key overlap with multimodal additions.
     llm = AutoModelForCausalLM.from_pretrained(llm_name_or_path, **init_kwargs)
 
@@ -392,7 +368,7 @@ def assemble_and_export_qwen_sonata_pretrained(
             f"missing={missing_tower}, unexpected={unexpected_tower}"
         )
 
-    # lm_head is part of Qwen2ForCausalLM (unless you choose to re-init or tie weights differently).
+    # Copy the Qwen3ForCausalLM output projection as well as its language tower.
     if hasattr(model, "lm_head") and hasattr(llm, "lm_head"):
         missing_head, unexpected_head = model.lm_head.load_state_dict(
             llm.lm_head.state_dict(), strict=strict_llm
@@ -418,7 +394,7 @@ def assemble_and_export_qwen_sonata_pretrained(
     if getattr(base_cfg, "tie_word_embeddings", False) and hasattr(model, "tie_weights"):
         model.tie_weights()
 
-    # 4) Load Sonata weights into point backbone.
+    # 5) Load Sonata weights into the point backbone.
     if not hasattr(model, "point_backbone") or model.point_backbone is None:
         raise AttributeError(
             "Assembled model has no `point_backbone`. Ensure your model_class builds Sonata."
@@ -431,8 +407,7 @@ def assemble_and_export_qwen_sonata_pretrained(
             "Sonata checkpoint must be a state_dict dict or have key 'state_dict'."
         )
 
-    # Official Sonata checkpoints are native state_dict (no prefixes) and can be loaded directly.
-    # We still keep a fallback that strips common prefixes for checkpoints saved from other codebases.
+    # Load the state_dict directly; parameter names must match the point backbone.
 
     missing_pb, unexpected_pb = model.point_backbone.load_state_dict(
         sonata_sd, strict=strict_sonata
@@ -443,7 +418,7 @@ def assemble_and_export_qwen_sonata_pretrained(
             f"Sonata strict load failed. missing={missing_pb}, unexpected={unexpected_pb}"
         )
 
-    # 4.5) Optional: load image backbone pretrained weights.
+    # 6) Optional: load image backbone pretrained weights.
     if use_image_backbone:
         if not hasattr(model, "image_backbone") or model.image_backbone is None:
             raise AttributeError(
@@ -465,11 +440,11 @@ def assemble_and_export_qwen_sonata_pretrained(
                 f"Image backbone strict load failed. missing={missing_v}, unexpected={unexpected_v}"
             )
 
-    # 5) Optional dtype cast.
+    # 7) Optional dtype cast.
     if dtype is not None:
         model.to(dtype=dtype)
 
-    # 6) Export HF-style checkpoint.
+    # 8) Export HF-style checkpoint.
     model.save_pretrained(export_dir, safe_serialization=True)
 
     # Preserve base LLM generation defaults (sampling params, eos list, etc.).
@@ -523,11 +498,11 @@ def assemble_and_export_physmeshllm_qwen_image_from_physmeshllm(
     base_cfg = config_class.from_pretrained(merged_model_name_or_path, **init_kwargs)
 
     # Optional: image backbone (e.g. CLIP).
-    # NOTE: in PhysLLMQwenForCausalLM, image modality is enabled by `config.image_backbone`.
+    # UniPhysGenQwen3ForCausalLM enables images through `config.image_backbone`.
     if use_image_backbone:
         setattr(base_cfg, "image_backbone", image_backbone)
         # Persist the exact vision tower spec for model __init__.
-        # `PhysLLMQwenForCausalLM` will prefer this over a default CLIPVisionConfig().
+        # UniPhysGenQwen3ForCausalLM prefers this over a default CLIPVisionConfig().
         if image_backbone_name_or_path is not None:
             setattr(base_cfg, "image_backbone_name_or_path", image_backbone_name_or_path)
             try:

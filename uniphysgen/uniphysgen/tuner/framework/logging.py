@@ -32,7 +32,7 @@ _default_log_level: "logging._Level" = logging.INFO
 
 
 class LoggerHandler(logging.Handler):
-    r"""Redirect the logging output to the logging file for LLaMA Board."""
+    r"""Write log records asynchronously to the training output directory."""
 
     def __init__(self, output_dir: str) -> None:
         super().__init__()

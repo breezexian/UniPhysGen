@@ -1,0 +1,60 @@
+# Run from uniphysgen/; paths follow the README preprocessing layout.
+
+### model
+# Checkpoint produced by configs/semantic_alignment.yaml.
+model_name_or_path: outputs/semantic_alignment
+trust_remote_code: true
+task_name: motion
+
+### method
+do_train: true
+freeze_motion_head: true
+
+### dataset
+# Top-level key in dataset_info.json; separate multiple keys with commas.
+dataset: uniphys_40k_kinematic_parameters
+# Task directory containing train.json and dataset_info.json.
+dataset_dir: data/UniPhys-40K-processed/train/kinematic_parameters
+# NPZ root passed to generate_jsons_for_training.py via --npz_dir.
+media_dir: data/UniPhys-40K-processed/npzs
+# Dataset cache, not model weights: the first run saves and exits; rerun to train.
+# Use a new cache path when changing data/media paths, or set null to disable it.
+save_dir: data/UniPhys-40K-processed/cache/kinematic_parameters
+template: physmeshllm_qwen
+num_bins: 256
+do_augmentation: false
+random_rotation: true
+cutoff_len: 8192
+overwrite_cache: true
+preprocessing_num_workers: 8
+dataloader_num_workers: 8
+use_spherical_axis: true
+random_xyz_rotation: true
+
+### output
+output_dir: outputs/kinematic_parameters
+logging_steps: 10
+save_steps: 500
+overwrite_output_dir: false
+save_total_limit: 5
+
+### train
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 1.0e-5
+num_train_epochs: 20
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+pure_bf16: false
+bf16: true
+fp16: false
+tf32: true
+ddp_timeout: 180000000
+report_to: wandb # choices: [none, wandb, tensorboard, swanlab]
+max_new_tokens: 4096
+
+### eval
+val_size: 0.0001
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 500

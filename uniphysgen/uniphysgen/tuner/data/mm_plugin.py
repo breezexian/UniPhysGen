@@ -27,7 +27,7 @@ POINT_S_TOKEN = os.environ.get("POINT_S_TOKEN", "<|point_start|>")
 POINT_E_TOKEN = os.environ.get("POINT_E_TOKEN", "<|point_end|>")
 POINT_CLOUD_PLACEHOLDER = os.environ.get("POINT_CLOUD_PLACEHOLDER", "<point_cloud>")
 
-# PhysLLM placeholders (dual point clouds + optional image)
+# UniPhysGen placeholders for part/object point clouds and optional images.
 PART_POINT_CLOUD_PLACEHOLDER = os.environ.get(
     "PART_POINT_CLOUD_PLACEHOLDER", "<part_point_cloud>"
 )
@@ -52,11 +52,11 @@ NORMALIZATION_PRESET = {
 
 
 class UniPhysGenPlugin:
-    """Multimodal plugin for PhysLLM.
+    """Multimodal preprocessing plugin for UniPhysGen.
 
     Supports:
       - dual point clouds: part-level and object-level
-      - optional images (paths only in this MVP)
+      - optional image paths converted to normalized image tensors
       - motion labels synchronized with the same geometric transform
 
     Notes:
@@ -113,8 +113,8 @@ class UniPhysGenPlugin:
             ]
         )
 
-        # Use "test" mode for GridSample when augmentation is off (inference),
-        # so voxel sampling is deterministic (picks center point instead of random).
+        # GridSample mode is controlled by grid_sample_mode, not do_augmentation:
+        # "train" samples randomly; "test" selects a deterministic voxel representative.
         self.transform = Compose(
             [
                 # IMPORTANT: do NOT CenterShift per-cloud here.
@@ -246,7 +246,7 @@ class UniPhysGenPlugin:
             shared_grid_min_coords: Optional[List[np.ndarray]] = None,
             **kwargs
     ) -> torch.Tensor:
-        """Pad variable-length point clouds to a batch tensor (B, max_len, 9).
+        """Pad point clouds to (B, max_len, 12): grid coords, XYZ, RGB, and normals.
 
         Args:
             point_clouds: list of point cloud dicts.
@@ -278,24 +278,16 @@ class UniPhysGenPlugin:
     def _regularize_images(self, images: Sequence[Sequence[str]], use_image: bool) -> Optional[torch.Tensor]:
         """Convert list-of-list image paths to a batched tensor.
 
-        MVP: expects 0 or 1 image per sample.
+        When enabled, samples without exactly one path receive a zero tensor.
         Returns:
             images: (B, 3, H, W) or None
         """
         if len(images) == 0 or not use_image:
             return None
-        # If any sample has no image, skip image modality for the whole batch.
-        # This matches: no image -> use None and skip image token.
-        # if any(len(x) == 0 for x in images):
-        #     return None
-
         tensors: List[torch.Tensor] = []
         for paths in images:
             if len(paths) != 1:
                 tensors.append(torch.zeros(3, self.image_size, self.image_size))
-                # raise ValueError(
-                #     f"PhysLLMPlugin MVP expects exactly one image per sample, got {len(paths)}"
-                # )
                 print(f"PhysLLMPlugin MVP expects exactly one image per sample, got {len(paths)}")
                 continue
             tensors.append(self._load_image_tensor(paths[0]))
@@ -544,11 +536,14 @@ class UniPhysGenPlugin:
             use_image: bool,
             task_name: str,
     ) -> List[Dict[str, str]]:
-        """Replace placeholders for PhysLLM modalities.
+        """Replace UniPhysGen modality placeholders with their token delimiters.
 
         - <part_point_cloud> -> <|part_point_start|><|point_pad|><|part_point_end|>
         - <object_point_cloud> -> <|object_point_start|><|point_pad|><|object_point_end|>
-        - <image> -> <|image_start|><|image_pad|><|image_end|> (MVP: no image tokens inserted here)
+        - <image> -> <|vision_start|><|image_pad|><|vision_end|> when use_image=True
+
+        These are the default token strings; environment variables may override them.
+        The model replaces padding placeholders with encoded modality features.
         """
         messages = deepcopy(messages)
         part_used = 0
@@ -577,10 +572,7 @@ class UniPhysGenPlugin:
                 obj_used += 1
 
             while IMAGE_PLACEHOLDER in content:
-                # If this sample has no image, drop the placeholder entirely.
-                # if num_images == 0:
-                #     content = content.replace(IMAGE_PLACEHOLDER, "", 1)
-                # else:
+                # Image placeholders remain here only when use_image is enabled.
                 content = content.replace(
                     IMAGE_PLACEHOLDER,
                     f"{IMAGE_S_TOKEN}{self.image_token}{IMAGE_E_TOKEN}",
@@ -615,13 +607,16 @@ class UniPhysGenPlugin:
             task_name: str,
             use_image: bool,
     ) -> Dict[str, Union[List[dict], torch.Tensor, List[List[str]], Dict[str, torch.Tensor]]]:
-        """Build PhysLLM multimodal inputs.
+        """Build UniPhysGen multimodal tensors and updated prompt messages.
 
         Args:
-            part_point_clouds/object_point_clouds: list of pcd paths (one per sample in MVP)
+            part_point_clouds/object_point_clouds: one point-cloud path per sample;
+                object_level reuses the object cloud for the part input.
             images: list of image path(s) per sample
             batch_prompts: list of messages per sample
             motions: list of motion dict per sample
+            task_name: registered task key (physics, motion, group, or object_level)
+            use_image: whether to load images and retain image placeholders
         """
         input_dict: Dict[str, Any] = {
             "part_point_clouds": None,
@@ -1086,7 +1081,7 @@ class UniPhysGenPlugin:
         return input_ids, labels
 
 
-# Backward-compatible alias. Legacy alias retained from the codebase refactor.
+# Legacy import alias for UniPhysGenPlugin; retained for caller compatibility.
 PhysMeshLLMPlugin = UniPhysGenPlugin
 
 

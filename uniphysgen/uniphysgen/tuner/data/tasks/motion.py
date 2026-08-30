@@ -209,15 +209,10 @@ class MotionTask(BaseTaskHandler):
             media_dir: Optional[str] = None,
             load_from: str = "file",
     ) -> Dict[str, Any]:
-        """Build multimodal feature fields for this task.
+        """Reuse BaseTaskHandler's multimodal fields for this task.
 
-        Returns a dict that can be attached to the converted example, e.g.:
-        {
-          "images": [..],
-          "part_point_clouds": [..],
-          "object_point_clouds": [..],
-          "motions": {...}
-        }
+        Returns _images, _part_point_clouds, _object_point_clouds, and _motions
+        for the dataset converter and MultiModalDataCollatorForSeq2Seq.
         """
         mm_feature = super().build_mm_features(feature, media_dir=media_dir, load_from=load_from)
         return mm_feature
@@ -256,9 +251,7 @@ class MotionTask(BaseTaskHandler):
         mtype_key = str(keys[0]).strip()
         m = motion_info.get(mtype_key) or {}
 
-        # Map dataset-specific keys to a generic schema.
-        # NOTE: your raw uses keys like "B"; joint type may be inferred from folder name
-        # or stored elsewhere. Here we keep it as "other" unless you provide it.
+        # Preserve the selected B/C motion type and expose its position as pivot.
         out = {
             "motion_type": mtype_key,
             "axis": m.get("axis"),

@@ -41,9 +41,10 @@ class BaseTaskHandler(ABC):
         """Build multimodal fields for the model input.
 
         Default implementation assumes the following schema:
-          - images: [part_info.global_img_pth]
-          - part/object point clouds: [part_info.obj_pth]
-          - motions: kinematic_info.motion_info
+          - _images: the _ori_0.png view derived from part_info.part_img
+          - _part_point_clouds: [part_info.part_ply]
+          - _object_point_clouds: [object_info.object_ply]
+          - _motions: an empty dict; tasks may override it with motion metadata
 
         Tasks can override this when their raw schema differs.
         """

@@ -243,12 +243,14 @@ class MotionLoss(nn.Module):
 
 
 class MotionLossBaseline(nn.Module):
-    """Baseline motion loss without axis ambiguity handling.
+    """Motion loss with sign-invariant directions and optional geometric position loss.
     
-    Simple version using:
-    - Cosine similarity for direction (without absolute value)
-    - SmoothL1 for position
+    The default loss uses:
+    - Absolute cosine similarity for direction (axis sign is ignored)
+    - SmoothL1 or geometric distance for position
     - SmoothL1 for range
+    Unlike MotionLoss, this class does not jointly flip the axis and range.
+    The mse/simple modes instead use MSE for all three components.
     
     Args:
         direction_weight: Weight for direction loss.
@@ -339,12 +341,12 @@ class MotionLossBaseline(nn.Module):
                 "range_loss": range_loss,
             }
 
-        # Direction loss: 1 - cos(theta)
+        # Direction loss: 1 - |cos(theta)|.
         # Use absolute cosine similarity to ignore axis direction sign ambiguity.
         cos_sim = F.cosine_similarity(pred_dir, gt_dir, dim=-1).abs()
         direction_loss = (1 - cos_sim).mean()
 
-        # Position loss: SmoothL1
+        # Position loss: geometric supervision when enabled, otherwise SmoothL1.
         if self.use_joint_position_loss:
             if self.use_axis_distance:
                 # 2. Position loss (axis distance)

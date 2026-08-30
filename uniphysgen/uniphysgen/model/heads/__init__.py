@@ -1,12 +1,10 @@
 # Copyright (c) PhysLLM Authors.
 # All rights reserved.
 
-"""PhysLLM Heads Module.
+"""Optional motion-regression heads for UniPhysGen.
 
-Scheme B:
-- Physics/Group are open-vocabulary generative tasks that use the base LM logits.
-    Their "heads" are lightweight prompt/format/parse helpers.
-- Motion is a regression head (nn.Module) and is called explicitly in the model.
+UniPhysGenQwen3ForCausalLM calls MotionHead for the motion task when
+use_motion_head is enabled. Generative tasks use the shared language-model head.
 """
 
 from .motion_head import MotionHead

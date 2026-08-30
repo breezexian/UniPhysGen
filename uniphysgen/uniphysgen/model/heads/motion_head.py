@@ -2,12 +2,12 @@
 # All rights reserved.
 
 """
-Motion Head for motion parameter regression.
+MotionHead for optional UniPhysGen motion-parameter regression.
 
-This head predicts continuous motion parameters:
-- axis_direction: [3] - unit vector for motion axis direction
-- axis_position: [3] - a point on the motion axis (canonical coordinates)
-- motion_range: [2] - (min, max) motion range
+Predictions are grouped into trans and rot dictionaries:
+- axis: [3] - unit motion-axis direction in both branches
+- pos: [3] - a point on the rotation axis, in the rot branch only
+- range: [2] - translation distances or rotation angles
 """
 
 from typing import Dict, Optional
@@ -57,7 +57,7 @@ class MotionHead(nn.Module):
         self.projector_fusion_mode = getattr(config, "projector_fusion_mode", "add")
         self.projector_use_shallow_gate = bool(getattr(config, "projector_use_shallow_gate", True))
         
-        # Shallow feature dimension (from point encoder intermediate layers)
+        # Dimension of fused, pooled part/object features from the point encoder.
         self.shallow_feature_dim = getattr(config, "shallow_feature_dim", 256)
 
         # -----------------------------
@@ -233,10 +233,10 @@ class MotionHead(nn.Module):
             attention_mask: Optional attention mask for pooling.
         
         Returns:
-            Dictionary containing:
-                - axis_direction: (batch_size, 3) - normalized direction vector
-                - axis_position: (batch_size, 3) - point on axis
-                - motion_range: (batch_size, 2) - (min, max) range
+            Nested branch dictionaries:
+                - trans: axis (batch_size, 3), range (batch_size, 2)
+                - rot: axis (batch_size, 3), pos (batch_size, 3), range (batch_size, 2)
+            Both axis predictions are normalized direction vectors.
         """
         # Pool hidden states if needed
         pooled: torch.Tensor
@@ -323,7 +323,7 @@ class MotionHead(nn.Module):
         rot_range = self.motion_head_rot["range"](features)
 
         return {
-            # Keep mm_plugin naming inside branches
+            # Use the axis/pos/range keys expected by compute_loss.
             "trans": {"axis": trans_axis, "range": trans_range},
             "rot": {"axis": rot_axis, "pos": rot_pos, "range": rot_range},
         }
@@ -338,7 +338,7 @@ class MotionHead(nn.Module):
         """Compute loss with explicit branch separation.
 
         motion_types: LongTensor[B], 0 -> B(trans), 1 -> C(rot)
-        motion_labels: expected keys axis/pos/range (from mm_plugin)
+        motion_labels: axis/pos/range tensors unpacked by UniPhysGenQwen3ForCausalLM
         """
         if motion_types is None:
             raise ValueError("motion_types is required for branched MotionHead.")
@@ -363,7 +363,7 @@ class MotionHead(nn.Module):
         if mask_B.any():
             pred_B = {
                 "axis_direction": pred["trans"]["axis"][mask_B],
-                # dummy axis_position to satisfy MotionLoss API; weight=0 so it won't matter
+                # MotionLossBaseline requires positions; matching zeros give no position loss.
                 "axis_position": torch.zeros_like(motion_labels["pos"][mask_B]),
                 "motion_range": pred["trans"]["range"][mask_B],
             }

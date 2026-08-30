@@ -29,7 +29,7 @@ logger = logging.get_logger(__name__)
 
 def get_forbidden_modules(finetuning_args: "FinetuningArguments") -> Set[str]:
     r"""
-    Freezes network modules for tuning.
+    Return the module-name prefixes selected for freezing during tuning.
     """
     forbidden_modules = set()
     if finetuning_args.freeze_point_tower:

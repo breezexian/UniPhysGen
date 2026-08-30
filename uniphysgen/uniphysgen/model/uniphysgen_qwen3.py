@@ -31,11 +31,10 @@ IGNORE_INDEX = -100
 
 
 class UniPhysGenQwen3Config(Qwen3Config):
-    # 暂时保留旧 model_type，兼容已有 checkpoint
+    # Transformers registration identifier for UniPhysGenQwen3Config.
     model_type = "uniphysgen_qwen3"
 
-    # Optional separate placeholders for part/object point clouds.
-    # If not set, will fall back to point_start_token_id/point_end_token_id.
+    # Separate part/object boundary ids, populated when assembling the checkpoint.
     part_point_start_token_id: Optional[int] = None
     part_point_end_token_id: Optional[int] = None
     object_point_start_token_id: Optional[int] = None
@@ -63,7 +62,7 @@ class UniPhysGenQwen3Config(Qwen3Config):
 
 @dataclass
 class PhysMeshLLMOutput3(CausalLMOutputWithPast):
-    """扩展输出：附带 motion 回归结果（可选）"""
+    """UniPhysGen causal-LM output with optional motion-regression predictions."""
 
     motion: Optional[Dict[str, torch.Tensor]] = None
 
@@ -351,7 +350,7 @@ class UniPhysGenQwen3ForCausalLM(Qwen3ForCausalLM):
             attention_mask: torch.Tensor,
             image_tokens: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, List[Tuple[int, int, int]]]:
-        """把 image_tokens 插入到 <image_start> 与 <image_end> 之间。
+        """Insert image_tokens between the configured vision start/end tokens.
 
         image_tokens: (B, Timg, H)
         Returns:
@@ -616,7 +615,7 @@ class UniPhysGenQwen3ForCausalLM(Qwen3ForCausalLM):
         loss = None
         motion_out: Optional[Dict[str, torch.Tensor]] = None
 
-        # 2) Task-specific heads
+        # 2) Optional MotionHead regression for the motion task.
         if self.task_name in {"motion"} and self.use_motion_head:
             motion_attention_mask: Optional[torch.Tensor] = None
             # Motion-head pooling mask (prompt-only) to avoid label leakage.
@@ -690,8 +689,8 @@ class UniPhysGenQwen3ForCausalLM(Qwen3ForCausalLM):
                 )
                 loss = loss_dict["loss"]
 
-        # Scheme B: physics/group are open-vocabulary generative tasks.
-        # They use the same LM logits + standard CausalLM loss; task separation is done by prompt/labels.
+        # Without a regression loss, all tasks use Qwen3 logits and causal-LM loss.
+        # Task-specific prompts and labels define the generated targets.
 
         if labels is not None and loss is None:
             max_len = logits.shape[1]

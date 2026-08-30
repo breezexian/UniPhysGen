@@ -67,12 +67,12 @@ class Point(Dict):
     as follows:
 
     - "coord": original coordinate of point cloud;
-    - "grid_coord": grid coordinate for specific grid size (related to GridSampling);
+    - "grid_coord": grid coordinate for specific grid size (related to GridSample);
     Point also support the following optional attributes:
     - "offset": if not exist, initialized as batch size is 1;
     - "batch": if not exist, initialized as batch size is 1;
     - "feat": feature of point cloud, default input of model;
-    - "grid_size": Grid size of point cloud (related to GridSampling);
+    - "grid_size": Grid size of point cloud (related to GridSample);
     (related to Serialization)
     - "serialized_depth": depth of serialization, 2 ** depth * grid_size describe the maximum of point cloud range;
     - "serialized_code": a list of serialization codes;
@@ -100,7 +100,7 @@ class Point(Dict):
         self["order"] = order
         assert "batch" in self.keys()
         if "grid_coord" not in self.keys():
-            # if you don't want to operate GridSampling in data augmentation,
+            # If GridSample is not used during data augmentation,
             # please add the following augmentation into your pipeline:
             # dict(type="Copy", keys_dict={"grid_size": 0.01}),
             # (adjust `grid_size` to what your want)
@@ -152,7 +152,7 @@ class Point(Dict):
 
     def sparsify(self, pad=96):
         """
-        Point Cloud Serialization
+        Convert the point cloud to a sparse convolution tensor.
 
         Point cloud is sparse, here we use "sparsify" to specifically refer to
         preparing "spconv.SparseConvTensor" for SpConv.
@@ -163,7 +163,7 @@ class Point(Dict):
         """
         assert {"feat", "batch"}.issubset(self.keys())
         if "grid_coord" not in self.keys():
-            # if you don't want to operate GridSampling in data augmentation,
+            # If GridSample is not used during data augmentation,
             # please add the following augmentation into your pipeline:
             # dict(type="Copy", keys_dict={"grid_size": 0.01}),
             # (adjust `grid_size` to what your want)

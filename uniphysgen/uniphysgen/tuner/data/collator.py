@@ -132,20 +132,21 @@ def _encode_messages_example(
 
 @dataclass
 class MultiModalDataCollatorForSeq2Seq(DataCollatorForSeq2Seq):
-    """Data collator for PhysLLM (Qwen) multimodal training.
+    """Data collator for UniPhysGen Qwen3 multimodal training.
 
     Expected per-feature keys (popped by collator):
       - _prompt, _response, optional _system
+      - _task_name and _use_image: task and modality selection for the batch
       - _images: image path or list of paths
-      - _part_point_clouds: part-level point cloud path (MVP: exactly one)
-      - _object_point_clouds: object-level point cloud path (MVP: exactly one)
-      - _motions: dict with axis/pos/range
+      - _part_point_clouds: one part cloud path (object_level reuses the object cloud)
+      - _object_point_clouds: one object cloud path
+      - _motions: task-specific motion metadata, empty for non-motion tasks
 
     Produces batch keys:
       - input_ids, attention_mask, labels
       - part_point_clouds, object_point_clouds
-      - images (paths, MVP)
-      - motion_labels (tensors)
+      - images: normalized image tensors, or None
+      - motion_types, motion_labels, centroids: motion metadata and optional tensors
     """
 
     template: Optional["Template"] = None
@@ -195,7 +196,7 @@ class MultiModalDataCollatorForSeq2Seq(DataCollatorForSeq2Seq):
                 messages=messages,
                 system=feature.pop("_system", ""),
                 point_clouds=batch_object_pcds[mi],
-                # PhysLLM uses dual point clouds; token insertion happens in model forward.
+                # UniPhysGenQwen3ForCausalLM inserts encoded point features during forward.
                 template=self.template,
                 tokenizer=self.tokenizer,
                 cutoff_len=self.template.cutoff_len,

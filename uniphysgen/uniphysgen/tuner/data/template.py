@@ -319,12 +319,12 @@ def register_physmeshllm_templates(
         random_xyz_rotation: bool = False,
         share_grid_origin: bool = True
 ):
-    """Register PhysLLM templates.
+    """Register the UniPhysGen Qwen3 template under its legacy physmeshllm_qwen key.
 
-    This uses PhysLLMPlugin which supports:
+    Uses UniPhysGenPlugin for:
       - <part_point_cloud> and <object_point_cloud> placeholders
-      - optional <image> placeholder (paths only in MVP)
-            - motion label synchronized transforms (per-sample motion_type: revolute/prismatic)
+      - optional <image> placeholders and image-tensor preprocessing
+      - shared geometric transforms for point clouds and motion labels
     """
     register_template(
         name="physmeshllm_qwen",

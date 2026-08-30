@@ -383,7 +383,7 @@ def _get_unprocessed_dataset(
         training_args: "Seq2SeqTrainingArguments",
         is_eval: bool = False,
 ) -> Optional[Union["Dataset", "IterableDataset"]]:
-    r"""Preprocesses the dataset, including format checking and tokenization."""
+    r"""Log a dataset example when requested; leave tokenization to the collator."""
     if dataset is None:
         return None
 

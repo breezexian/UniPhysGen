@@ -42,7 +42,7 @@ logger = logging.get_logger(__name__)
 
 
 class CustomSeq2SeqTrainer(Seq2SeqTrainer):
-    r"""Inherits Seq2SeqTrainer to compute generative metrics such as BLEU and ROUGE."""
+    r"""Seq2SeqTrainer with prompt masking in generated predictions."""
 
     def __init__(
         self,
@@ -71,10 +71,7 @@ class CustomSeq2SeqTrainer(Seq2SeqTrainer):
         ignore_keys: Optional[list[str]] = None,
         **gen_kwargs,
     ) -> tuple[Optional[float], Optional["torch.Tensor"], Optional["torch.Tensor"]]:
-        r"""Remove the prompt part in the generated tokens.
-
-        Subclass and override to inject custom behavior.
-        """
+        r"""Mask the generated prompt tokens with padding and return the original labels."""
         if self.args.predict_with_generate:  # do not pass labels to model when generate
             labels = inputs.pop("labels", None)
         else:
@@ -107,13 +104,7 @@ def run_sft(
     tokenizer_module = load_tokenizer(model_args)
     tokenizer = tokenizer_module["tokenizer"]
 
-    # register_spatiallm_templates(
-    #     cutoff_len=data_args.cutoff_len,
-    #     num_bins=data_args.num_bins,
-    #     do_augmentation=data_args.do_augmentation,
-    #     random_rotation=data_args.random_rotation,
-    # )
-
+    # Register the UniPhysGen template using the existing configuration key.
     register_physmeshllm_templates(
         cutoff_len=data_args.cutoff_len,
         num_bins=data_args.num_bins,
