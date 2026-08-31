@@ -11,7 +11,7 @@
   <a href="https://github.com/breezexian/UniPhysGen"><img src="https://img.shields.io/badge/%F0%9F%8C%90%20Project-Page-42a5f5" alt="Project Page" /></a>
   <a href="https://github.com/breezexian/UniPhysGen"><img src="https://img.shields.io/badge/GitHub-UniPhysGen-181717?logo=github" alt="GitHub" /></a>
   <a href="https://huggingface.co/collections/breezexian/uniphysgen"><img src="https://img.shields.io/badge/Models-Available-FFD21E" alt="Models" /></a>
-  <a href="https://huggingface.co/datasets/spatialverse/UniPhys-Bench"><img src="https://img.shields.io/badge/Datasets-Available-FFD21E" alt="Datasets" /></a>
+  <a href="https://huggingface.co/datasets/spatialverse/UniPhys-Bench"><img src="https://img.shields.io/badge/Datasets-Coming%20soon-lightgrey" alt="Datasets (Coming soon)" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/Code-Apache--2.0-blue.svg" alt="Apache License 2.0" /></a>
 </div>
 
@@ -34,7 +34,6 @@
 
 ## <a id="news"></a>📢 News
 
-- **August 31, 2026:** The UniPhys-Bench dataset has been released. Download [here](https://huggingface.co/datasets/spatialverse/UniPhys-Bench).
 - **August 30, 2026:** The UniPhysGen model weights have been released. Download [here](https://huggingface.co/collections/breezexian/uniphysgen).
 - **August 30, 2026:** The source code for UniPhysGen and the UniPhys Pipeline has been released.
 - **July 2026:** The UniPhysGen paper was released on [arXiv](https://arxiv.org/abs/2607.13586).
@@ -43,7 +42,7 @@
 
 - [x] Release the UniPhysGen and UniPhys Pipeline source code.
 - [x] Release the UniPhysGen model weights.
-- [x] Release the UniPhys-Bench dataset.
+- [ ] Release the UniPhys-Bench dataset.
 - [ ] Release the UniPhys-40K dataset.
 
 ---
@@ -73,7 +72,7 @@
 | **UniPhys Pipeline** | Raw meshes → simulation-ready assets | [Pipeline README](./uniphys_pipeline/README.md) |
 | **UniPhysGen** | Segmented 3D objects → unified physical semantics | [Model and training README](./uniphysgen/README.md) |
 | **UniPhys-40K** | Large-scale training dataset | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) (Coming soon) |
-| **UniPhys-Bench** | Human-verified evaluation benchmark | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
+| **UniPhys-Bench** | Human-verified evaluation benchmark | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) (Coming soon) |
 
 ---
 
@@ -95,7 +94,7 @@
 | Dataset | Scale | Purpose | Link |
 | --- | --- | --- | --- |
 | **UniPhys-40K** | 40K (40014) objects · 400K total parts · 370K filtered training parts | Large-scale training corpus with object- and part-level physical grounding annotations | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) (Coming soon) |
-| **UniPhys-Bench** | 1.9K (1927) objects · 16K parts · 5.5K motion-relevant components | Curated benchmark for unified physical-grounding evaluation and simulation-oriented inspection | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
+| **UniPhys-Bench** | 1.9K (1927) objects · 16K parts · 5.5K motion-relevant components | Curated benchmark for unified physical-grounding evaluation and simulation-oriented inspection | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) (Coming soon) |
 
 The Hugging Face dataset pages document directory layouts, annotation schemas, filtering fields, units, provenance, and usage notes.
 
