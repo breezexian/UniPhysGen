@@ -15,7 +15,7 @@
   <a href="./LICENSE"><img src="https://img.shields.io/badge/Code-Apache--2.0-blue.svg" alt="Apache License 2.0" /></a>
 </div>
 
-<p align="center"><strong>Unified Physical Grounding for Simulation-Ready 3D Assets</strong></p>
+<h3 align="center">Unified Physical Grounding for Simulation-Ready 3D Assets</h3>
 
 <p align="center">
   <a href="#news"><b>News</b></a> |
@@ -34,6 +34,7 @@
 
 ## <a id="news"></a>📢 News
 
+- **August 31, 2026:** The UniPhys-Bench dataset has been released. Download [here](https://huggingface.co/datasets/spatialverse/UniPhys-Bench).
 - **August 30, 2026:** The UniPhysGen model weights have been released. Download [here](https://huggingface.co/collections/breezexian/uniphysgen).
 - **August 30, 2026:** The source code for UniPhysGen and the UniPhys Pipeline has been released.
 - **July 2026:** The UniPhysGen paper was released on [arXiv](https://arxiv.org/abs/2607.13586).
@@ -42,7 +43,7 @@
 
 - [x] Release the UniPhysGen and UniPhys Pipeline source code.
 - [x] Release the UniPhysGen model weights.
-- [ ] Release the UniPhys-Bench dataset.
+- [x] Release the UniPhys-Bench dataset.
 - [ ] Release the UniPhys-40K dataset.
 
 ---
@@ -72,7 +73,7 @@
 | **UniPhys Pipeline** | Raw meshes → simulation-ready assets | [Pipeline README](./uniphys_pipeline/README.md) |
 | **UniPhysGen** | Segmented 3D objects → unified physical semantics | [Model and training README](./uniphysgen/README.md) |
 | **UniPhys-40K** | Large-scale training dataset | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) (Coming soon) |
-| **UniPhys-Bench** | Human-verified evaluation benchmark | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) (Coming soon) |
+| **UniPhys-Bench** | Human-verified evaluation benchmark | [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
 
 ---
 
@@ -94,7 +95,7 @@
 | Dataset | Scale | Purpose | Link |
 | --- | --- | --- | --- |
 | **UniPhys-40K** | 40K (40014) objects · 400K total parts · 370K filtered training parts | Large-scale training corpus with object- and part-level physical grounding annotations | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) (Coming soon) |
-| **UniPhys-Bench** | 1.9K (1927) objects · 16K parts · 5.5K motion-relevant components | Curated benchmark for unified physical-grounding evaluation and simulation-oriented inspection | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) (Coming soon) |
+| **UniPhys-Bench** | 1.9K (1927) objects · 16K parts · 5.5K motion-relevant components | Curated benchmark for unified physical-grounding evaluation and simulation-oriented inspection | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
 
 The Hugging Face dataset pages document directory layouts, annotation schemas, filtering fields, units, provenance, and usage notes.
 
