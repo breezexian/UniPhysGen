@@ -13,7 +13,7 @@
   <a href="https://huggingface.co/breezexian/UniPhysGen-1.7B-Physics">
     <img src="https://img.shields.io/badge/Models-Available-FFD21E" alt="Hugging Face models" />
   </a>
-  <a href="https://huggingface.co/datasets/spatialverse/UniPhys-40K">
+  <a href="https://huggingface.co/datasets/breezexian/UniPhys-40K">
     <img src="https://img.shields.io/badge/Datasets-Available-FFD21E" alt="Hugging Face datasets" />
   </a>
   <img src="https://img.shields.io/badge/Transformers-4.51.0-6C5CE7" alt="Transformers 4.51.0" />
@@ -95,8 +95,8 @@ Face. The training-only initialization checkpoint is documented separately in
 
 | Dataset | Purpose | Scale | Download |
 | --- | --- | --- | --- |
-| UniPhys-40K | Training unified physical grounding models | 40K (40014) objects, 400K total parts, 370K filtered training parts | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-40K) |
-| UniPhys-Bench | Human-verified unified physical grounding evaluation | 1.9K (1927) articulated objects, 16K parts, 5.5K motion-relevant components | 🤗 [Hugging Face](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) |
+| UniPhys-40K | Training unified physical grounding models | 40K (40014) objects, 400K total parts, 370K filtered training parts | 🤗 [Hugging Face](https://huggingface.co/datasets/breezexian/UniPhys-40K) |
+| UniPhys-Bench | Human-verified unified physical grounding evaluation | 1.9K (1927) articulated objects across two releases, 16K parts, 5.5K motion-relevant components | 🤗 [Primary release](https://huggingface.co/datasets/spatialverse/UniPhys-Bench) · [Part 2](https://huggingface.co/datasets/breezexian/UniPhys-Bench-Part2) |
 
 ---
 
@@ -348,8 +348,9 @@ Every saved prediction follows the versioned
 ## <a id="reproducing-uniphys-bench-results"></a>Reproducing UniPhys-Bench Results
 
 Use this workflow to reproduce the four groups of UniPhysGen results reported
-on UniPhys-Bench. Starting from the released benchmark, the full path from raw
-assets to paper metrics contains four steps:
+on UniPhys-Bench. The complete 1,927-object benchmark consists of the primary
+release (1,473 objects) and Part 2 (454 objects). The full path from raw assets
+to paper metrics contains four steps:
 
 ```text
 UniPhys-Bench
@@ -370,16 +371,21 @@ python -m eval             Compute the paper metrics
 
 ### 1. Download UniPhys-Bench
 
-Download the released benchmark from Hugging Face:
+Download both releases from Hugging Face:
 
 ```bash
 hf download \
   spatialverse/UniPhys-Bench \
   --repo-type dataset \
   --local-dir data/UniPhys-Bench
+
+hf download \
+  breezexian/UniPhys-Bench-Part2 \
+  --repo-type dataset \
+  --local-dir data/UniPhys-Bench-Part2
 ```
 
-The following commands assume this layout:
+The following commands show the workflow for the primary release:
 
 ```text
 data/UniPhys-Bench/              Downloaded benchmark
@@ -389,6 +395,12 @@ data/UniPhys-Bench-processed/
 outputs/UniPhys-Bench/           Model predictions
 metrics/UniPhys-Bench/           Final metric reports
 ```
+
+Run the same preprocessing, inference, and evaluation steps for Part 2 by
+using `data/UniPhys-Bench-Part2`, `data/UniPhys-Bench-Part2-processed`,
+`outputs/UniPhys-Bench-Part2`, and `metrics/UniPhys-Bench-Part2`. Reproducing
+the complete benchmark requires both releases; preserve the original globally
+unique entity IDs if their outputs are consolidated.
 
 ### 2. Prepare point clouds
 
@@ -569,7 +581,7 @@ UniPhysGen-1.7B-Init ───────────────────�
 
 ```bash
 hf download \
-  spatialverse/UniPhys-40K \
+  breezexian/UniPhys-40K \
   --repo-type dataset \
   --local-dir data/UniPhys-40K
 ```
