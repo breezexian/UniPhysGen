@@ -366,15 +366,4 @@ def main():
 
 
 if __name__ == "__main__":
-    """
-    python pre_process/generate_npzs.py --data_root /data-koolab-nas/xianzi/uniphys-40k_release --output_dir /data-koolab-nas/xianzi/data/UniPhys-40K-processed/npzs
-    
-    CUDA_VISIBLE_DEVICES=0 python inference_batch_kinematic_parameters.py \
-  --model_path /data-koolab-nas/xianzi/code/physmeshllm/physmeshllm_base-1.7B-motion_full_spherical_0_2_share_newxyz \
-  --input_json /data-koolab-nas/xianzi/data/UniPhys-Bench-processed/manifests/kinematic_parameters.json \
-  --data_root /data-koolab-nas/xianzi/data/UniPhys-Bench-processed/npzs \
-  --spherical_axis \
-  --output outputs/UniPhys-Bench/kinematic_parameters.json
-    
-    """
     main()

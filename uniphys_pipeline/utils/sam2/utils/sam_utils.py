@@ -263,18 +263,6 @@ def get_multi_view_gpt_input(mult_view_dir, save_path):
 
     plt.close()
 
-
-# root = "/home/xianzi/code/Phys-RM/render_data/bed/001/vis_seg"
-# get_multi_view_mask(root, root)
-# root = "/home/xianzi/code/Phys-RM/render_data/bed/001/views"
-# save = "/home/xianzi/code/Phys-RM/render_data/bed/001/gpt_input"
-# get_multi_view_gpt_input(root, save)
-#
-# root = "/home/xianzi/code/Phys-RM/render_data/bed/001/mlt_seg"
-# save = "/home/xianzi/code/Phys-RM/render_data/bed/001/mlt_seg"
-# get_multi_view_gpt_input(root, save)
-# assert 1==2
-
 def save_gpt_input(data_root):
     for cate in os.listdir(data_root):
         cate_dir = os.path.join(data_root, cate)
