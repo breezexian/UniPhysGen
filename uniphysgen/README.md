@@ -175,7 +175,8 @@ complete paper-evaluation workflow.
 
 ### Point-cloud input
 
-The recommended input format is `.npz` with three aligned arrays:
+UniPhysGen requires point-cloud inputs in `.npz` format with three aligned
+arrays:
 
 ```text
 point   float32 [N, 3]   3D coordinates
@@ -183,9 +184,9 @@ color   uint8   [N, 3]   RGB values
 normal  float32 [N, 3]   surface normals
 ```
 
-Other point-cloud formats supported by Open3D, such as `.ply` and `.pcd`, can
-also be used. For these formats, the current loader uses the available points
-and colors and initializes normals to zero.
+All three arrays are required. The released checkpoints were trained and
+evaluated with valid surface normals; inputs with missing or zero-filled
+normals are not supported and may produce unreliable predictions.
 
 Articulation-structure grounding additionally reads the following arrays from
 the object `.npz` file:
